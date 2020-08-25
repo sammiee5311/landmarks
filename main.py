@@ -9,7 +9,8 @@ class pose_landmarks:
         self.in_height = 186
         if select_model == 'body25':
             self.point_pairs, self.n_points = self.body25()
-        self.point_classes, self.point_pairs, self.n_points = self.coco() if select_model == 'coco' else self.mpi()
+        else:
+            self.point_classes, self.point_pairs, self.n_points = self.coco() if select_model == 'coco' else self.mpi()
         self.proto_file = {
             'coco': './pose/coco/pose_deploy_linevec.prototxt',
             'mpi': './pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt',
