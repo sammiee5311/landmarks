@@ -2,15 +2,16 @@ import cv2
 import imutils
 from imutils.video import WebcamVideoStream
 
+
 class pose_landmarks:
     def __init__(self, select_model='mpi'):
         self.select_model = select_model
-        self.in_width = 186
-        self.in_height = 186
+        self.in_width = 164
+        self.in_height = 164
         if select_model == 'body25':
             self.point_pairs, self.n_points = self.body25()
         else:
-            self.point_classes, self.point_pairs, self.n_points = self.coco() if select_model == 'coco' else self.mpi()
+            self.point_pairs, self.n_points = self.coco() if select_model == 'coco' else self.mpi()
         self.proto_file = {
             'coco': './pose/coco/pose_deploy_linevec.prototxt',
             'mpi': './pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt',
@@ -25,14 +26,6 @@ class pose_landmarks:
                                             self.weight_file[str(self.select_model)])
 
     def coco(self):
-        point_classes = {
-            "nose": 0, "neck": 1,
-            "right shoulder": 2, "right elbow": 3, "right wrist": 4,
-            "left shoulder": 5, "left elbow": 6, "left wrist": 7,
-            "right hip": 8, "right knee": 9, "right ankle": 10,
-            "left hip": 11, "left knee": 12, "left ankle": 13,
-            "right eye": 14, "left eye": 15,
-            "right ear": 16, "left ear": 17, }
         point_pairs = [[1, 0], [1, 2], [1, 5],
                        [2, 3], [3, 4], [5, 6],
                        [6, 7], [1, 8], [8, 9],
@@ -41,17 +34,9 @@ class pose_landmarks:
                        [14, 16], [15, 17]]
         n_points = 18
 
-        return point_classes, point_pairs, n_points
+        return point_pairs, n_points
 
     def mpi(self):
-        point_classes = {
-            "head": 0, "neck": 1,
-            "right shoulder": 2, "right elbow": 3, "right wrist": 4,
-            "left shoulder": 5, "left elbow": 6, "left wrist": 7,
-            "right Hip": 8, "right knee": 9, "right ankle": 10,
-            "left hip": 11, "left knee": 12, "left ankle": 13,
-            "chest": 14, "background": 15
-        }
         point_pairs = [[0, 1], [1, 2], [2, 3],
                        [3, 4], [1, 5], [5, 6],
                        [6, 7], [1, 14], [14, 8],
@@ -60,7 +45,7 @@ class pose_landmarks:
                        ]
         n_points = 15
 
-        return point_classes, point_pairs, n_points
+        return point_pairs, n_points
 
     def body25(self):
         point_pairs = [[1, 0], [1, 2], [1, 5],
@@ -77,11 +62,7 @@ class pose_landmarks:
 
     def start(self):
         cap = WebcamVideoStream(src=0).start()
-        # cap = cv2.VideoCapture(0)
-        # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         while True:
-            # camera = cv2.VideoCapture(0)
             img = cap.read()
             img_height, img_width, _ = img.shape
             blob = cv2.dnn.blobFromImage(img, 1 / 255.0, (self.in_width, self.in_height),
@@ -101,16 +82,16 @@ class pose_landmarks:
 
                 min_val, prob, min_loc, point = cv2.minMaxLoc(prob_map)
 
-                x = (img_width * point[0]) / W
-                y = (img_height * point[1]) / H
+                x = (img_width * point[0]) // W
+                y = (img_height * point[1]) // H
 
                 if prob > 0.1:
-                    cv2.circle(img, (int(x), int(y)), 15, (0, 255, 255),
+                    cv2.circle(img, (x, y), 15, (0, 255, 255),
                                1, cv2.FILLED)
-                    cv2.putText(img, '%d' % i, (int(x), int(y)), cv2.FONT_HERSHEY_COMPLEX,
-                                1.4, (0, 0, 255), 3, lineType=cv2.LINE_AA)
+                    cv2.putText(img, '%d' % i, (x, y), cv2.FONT_HERSHEY_COMPLEX,
+                                1.4, (0, 0, 255), 3)
 
-                    points.append((int(x), int(y)))
+                    points.append((x, y))
                 else:
                     points.append(None)
 
@@ -133,5 +114,6 @@ class pose_landmarks:
                 cv2.waitKey(1)
 
 
-pose = pose_landmarks()
+# default model is mpi
+pose = pose_landmarks(select_model='mpi')
 pose.start()
