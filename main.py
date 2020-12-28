@@ -1,6 +1,5 @@
 import cv2
 import imutils
-from imutils.video import WebcamVideoStream
 
 
 class pose_landmarks:
@@ -22,8 +21,7 @@ class pose_landmarks:
             'mpi': './pose/mpi/pose_iter_160000.caffemodel',
             'body25': './pose/body_25/pose_iter_584000.caffemodel'
         }
-        self.net = cv2.dnn.readNetFromCaffe(self.proto_file[str(self.select_model)],
-                                            self.weight_file[str(self.select_model)])
+        self.net = cv2.dnn.readNetFromCaffe(self.proto_file[str(self.select_model)], self.weight_file[str(self.select_model)])
 
     def coco(self):
         point_pairs = [[1, 0], [1, 2], [1, 5],
@@ -61,12 +59,11 @@ class pose_landmarks:
         return point_pairs, n_points
 
     def start(self):
-        cap = WebcamVideoStream(src=0).start()
+        cap = cv2.VideoCapture(0)
         while True:
-            img = cap.read()
+            _, img = cap.read()
             img_height, img_width, _ = img.shape
-            blob = cv2.dnn.blobFromImage(img, 1 / 255.0, (self.in_width, self.in_height),
-                                         (0, 0, 0), swapRB=False, crop=False)
+            blob = cv2.dnn.blobFromImage(img, 1 / 255.0, (self.in_width, self.in_height), (0, 0, 0), swapRB=False, crop=False)
 
             self.net.setInput(blob)
 
@@ -86,30 +83,20 @@ class pose_landmarks:
                 y = (img_height * point[1]) // H
 
                 if prob > 0.1:
-                    cv2.circle(img, (x, y), 15, (0, 255, 255),
-                               1, cv2.FILLED)
-                    cv2.putText(img, '%d' % i, (x, y), cv2.FONT_HERSHEY_COMPLEX,
-                                1.4, (0, 0, 255), 3)
+                    cv2.circle(img, (x, y), 15, (0, 255, 255), 1, cv2.FILLED)
+                    cv2.putText(img, '%d' % i, (x, y), cv2.FONT_HERSHEY_COMPLEX, 1.2, (0, 0, 255), 2)
 
                     points.append((x, y))
                 else:
                     points.append(None)
 
             for pair in self.point_pairs:
-                partA = pair[0]
-                partB = pair[1]
+                part_A = pair[0]
+                part_B = pair[1]
 
-                if points[partA] and points[partB]:
-                    cv2.line(img,
-                             points[partA],
-                             points[partB],
-                             (0, 255, 255), 3)
-                    cv2.circle(img,
-                               points[partA],
-                               8,
-                               (0, 0, 255),
-                               thickness=-1,
-                               lineType=cv2.FILLED)
+                if points[part_A] and points[part_B]:
+                    cv2.line(img, points[part_A], points[part_B], (0, 255, 255), 3)
+                    cv2.circle(img, points[part_A], 5, (0, 0, 255), 1)
                 cv2.imshow('img', img)
                 cv2.waitKey(1)
 

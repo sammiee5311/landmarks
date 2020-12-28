@@ -1,6 +1,13 @@
 # landmarks
++ display the body landmarks in real time thru webcam.
 
 ## How to use
++ download pretrained models(coco, mpi, body25)
++ put the pretrained models
+    + pose/coco/
+    + pose/mpi
+    + pose/body_25
++ run main.py
 
 ## Requirements
 + Cmake
@@ -25,7 +32,11 @@
 + background: 15
 
 ## Images
+<p float="center">
+  <img src="https://github.com/sammiee5311/landmarks/blob/master/img/test.gif" width="450" heights="405"/>
+</p>
+
+I've got around 23 fps with mpi model which is best result among 3 models.
 
 ### Reference
 + https://www.learnopencv.com/deep-learning-based-human-pose-estimation-using-opencv-cpp-python/
-+ https://www.pyimagesearch.com/2015/12/21/increasing-webcam-fps-with-python-and-opencv/
